@@ -1,4 +1,4 @@
-name: PR and push to main
+name: Build and test
 
 on:
   pull_request:
