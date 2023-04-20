@@ -156,10 +156,10 @@ func TestIsTypeNameSupportedSave(t *testing.T) {
 		{"png", true},
 		{"webp", true},
 		{"pdf", false},
-		{"tiff", VipsVersion >= "8.5.0"},
-		{"heif", VipsVersion >= "8.8.0"},
-		{"avif", VipsVersion >= "8.9.0"},
-		{"gif", VipsVersion >= "8.12.0"},
+		{"tiff", true},
+		{"heif", true},
+		{"avif", true},
+		{"gif", true},
 	}
 
 	for _, n := range types {

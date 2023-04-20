@@ -32,11 +32,12 @@ jobs:
             -t nestor-sk/vimgo:ci \
             --build-arg LIBVIPS_VERSION=${{ matrix.vips-version }} \
             .
-
           docker run \
-            --mount type=bind,source="$(pwd)",target=/app \
-            -w /app \
-            -e LD_LIBRARY_PATH=/vips/lib:/usr/local/lib:$LD_LIBRARY_PATH \
-            -e PKG_CONFIG_PATH=/vips/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/lib/pkgconfig:/usr/X11/lib/pkgconfig \
+            --mount type=bind,source="$(pwd)",target=/pwd \
             nestor-sk/vimgo:ci \
-            sh -c 'go vet . && golint . && go test -v -race -covermode=atomic -coverprofile=coverage.out'
+            sh -c 'go vet . && golangci-lint run && go test -v -race -covermode=atomic -coverprofile=/pwd/covprofile'
+
+      - name: Upload coverage
+        uses: shogo82148/actions-goveralls@v1
+        with:
+          path-to-profile: covprofile
