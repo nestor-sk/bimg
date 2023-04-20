@@ -229,7 +229,7 @@ func transformImage(image *C.VipsImage, o Options, shrink int, residual float64)
 	var err error
 	// Use vips_shrink with the integral reduction
 	if shrink > 1 {
-		image, residual, err = shrinkImage(image, o, residual, shrink)
+		image, residual, err = shrinkImage(image, o, shrink)
 		if err != nil {
 			return nil, err
 		}
@@ -313,7 +313,8 @@ func extractOrEmbedImage(image *C.VipsImage, o Options) (*C.VipsImage, error) {
 		left, top := (o.Width-inWidth)/2, (o.Height-inHeight)/2
 		image, err = vipsEmbed(image, left, top, o.Width, o.Height, o.Extend, o.Background)
 	case o.Trim:
-		left, top, width, height, err := vipsTrim(image, o.Background, o.Threshold)
+		var left, top, width, height int
+		left, top, width, height, err = vipsTrim(image, o.Background, o.Threshold)
 		if err == nil {
 			image, err = vipsExtract(image, left, top, width, height)
 		}
@@ -439,7 +440,9 @@ func zoomImage(image *C.VipsImage, zoom int) (*C.VipsImage, error) {
 	return vipsZoom(image, zoom+1)
 }
 
-func shrinkImage(image *C.VipsImage, o Options, residual float64, shrink int) (*C.VipsImage, float64, error) {
+func shrinkImage(image *C.VipsImage, o Options, shrink int) (*C.VipsImage, float64, error) {
+	var residual float64
+
 	// Use vips_shrink with the integral reduction
 	image, err := vipsShrink(image, shrink)
 	if err != nil {

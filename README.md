@@ -1,3 +1,5 @@
+# vimgo ![Build and test](https://github.com/nestor-sk/vimgo/actions/workflows/build_test.yaml/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/nestor-sk/vimgo/badge.svg?branch=main)](https://coveralls.io/repos/github/nestor-sk/vimgo/badge.svg?branch=main) ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+
 IMPORTANT: This is a fork of https://github.com/h2non/bimg/tree/44c1dfbd7e8088698bb032e690dacca1b90fe891 @ March 15, 2020. It is expected to diverge so much that it will become its own separeted "package". The goal of this fork is to break support for anything lower than libvips v8.14 and go v1.20 and cover as many of the open issues in the original repo.
 
 ---
