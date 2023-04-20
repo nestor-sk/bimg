@@ -1,26 +1,19 @@
-# vimgo ![Build and test](https://github.com/nestor-sk/vimgo/actions/workflows/build_test.yaml/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/nestor-sk/vimgo/badge.svg?branch=main)](https://coveralls.io/repos/github/nestor-sk/vimgo/badge.svg?branch=main) ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+# vimgo ![Build and test](https://github.com/nestor-sk/vimgo/actions/workflows/build_test.yaml/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/nestor-sk/vimgo/badge.svg?branch=main)](https://coveralls.io/github/nestor-sk/vimgo?branch=main) ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+
+---
 
 IMPORTANT: This is a fork of https://github.com/h2non/bimg/tree/44c1dfbd7e8088698bb032e690dacca1b90fe891 @ March 15, 2020. It is expected to diverge so much that it will become its own separeted "package". The goal of this fork is to break support for anything lower than libvips v8.14 and go v1.20 and cover as many of the open issues in the original repo.
 
 ---
 
-# bimg [![Build Status](https://travis-ci.org/h2non/bimg.svg)](https://travis-ci.org/h2non/bimg) [![GoDoc](https://godoc.org/github.com/h2non/bimg?status.svg)](https://godoc.org/github.com/h2non/bimg) [![Coverage Status](https://coveralls.io/repos/github/h2non/bimg/badge.svg?branch=master)](https://coveralls.io/github/h2non/bimg?branch=master) ![License](https://img.shields.io/badge/license-MIT-blue.svg)
+Small [Go](http://golang.org) package for fast high-level image processing using [libvips](https://github.com/libvips/libvips) via C bindings, providing a simple [programmatic API](#examples).
 
-Small [Go](http://golang.org) package for fast high-level image processing using [libvips](https://github.com/jcupitt/libvips) via C bindings, providing a simple [programmatic API](#examples).
+vimgo was designed to be a small and efficient library supporting common [image operations](#supported-image-operations) such as crop, resize, rotate, zoom or watermark. It can read JPEG, PNG, WEBP natively, and optionally TIFF, PDF, GIF, SVG and AVIF formats if `libvips` is compiled with proper library bindings. vimgo is able to output images as JPEG, PNG and WEBP formats, including transparent conversion across them.
 
-bimg was designed to be a small and efficient library supporting common [image operations](#supported-image-operations) such as crop, resize, rotate, zoom or watermark. It can read JPEG, PNG, WEBP natively, and optionally TIFF, PDF, GIF and SVG formats if `libvips@8.3+` is compiled with proper library bindings. Lastly AVIF is supported as of `libvips@8.9+`. For AVIF support `libheif` needs to be [compiled with an applicable AVIF en-/decoder](https://github.com/strukturag/libheif#compiling).
-
-bimg is able to output images as JPEG, PNG and WEBP formats, including transparent conversion across them.
-
-bimg uses internally libvips, a powerful library written in C for image processing which requires a [low memory footprint](https://github.com/jcupitt/libvips/wiki/Speed_and_Memory_Use)
+vimgo uses internally libvips, a powerful library written in C for image processing which requires a [low memory footprint](https://github.com/libvips/libvips/wiki/Speed_and_Memory_Use)
 and it's typically 4x faster than using the quickest ImageMagick and GraphicsMagick settings or Go native `image` package, and in some cases it's even 8x faster processing JPEG images.
 
-If you're looking for an HTTP based image processing solution, see [imaginary](https://github.com/h2non/imaginary).
-
-bimg was heavily inspired in [sharp](https://github.com/lovell/sharp), its homologous package built for [node.js](http://nodejs.org). bimg is used in production environments processing thousands of images per day.
-
-**v1 notice**: `bimg` introduces some minor breaking changes in `v1` release.
-If you're using `gopkg.in`, you can still rely in the `v0` without worrying about API breaking changes.
+vimgo is a forked from [bimg](https://github.com/h2non/bimg) which was heavily inspired in [sharp](https://github.com/lovell/sharp), its homologous package built for [node.js](http://nodejs.org).
 
 ## Contents
 
@@ -32,14 +25,13 @@ If you're using `gopkg.in`, you can still rely in the `v0` without worrying abou
 - [Examples](#examples)
 - [Debugging](#debugging)
 - [API](#api)
-- [Authors](#authors)
 - [Credits](#credits)
 
 ## Supported image operations
 
 - Resize
 - Enlarge
-- Crop (including smart crop support, libvips 8.5+)
+- Crop (including smart crop support)
 - Rotate (with auto-rotate based on EXIF orientation)
 - Flip (with auto-flip based on EXIF metadata)
 - Flop
@@ -51,23 +43,18 @@ If you're using `gopkg.in`, you can still rely in the `v0` without worrying abou
 - Custom output color space (RGB, grayscale...)
 - Format conversion (with additional quality/compression settings)
 - EXIF metadata (size, alpha channel, profile, orientation...)
-- Trim (libvips 8.6+)
+- Trim
 
 ## Prerequisites
 
-- [libvips](https://github.com/libvips/libvips) 8.3+ (8.8+ recommended)
+- [libvips](https://github.com/libvips/libvips) 8.14+
 - C compatible compiler such as gcc 4.6+ or clang 3.0+
-- Go 1.3+
-
-**Note**:
-
-- `libvips` v8.3+ is required for GIF, PDF and SVG support.
-- `libvips` v8.9+ is required for AVIF support. `libheif` compiled with a AVIF en-/decoder also needs to be present.
+- Go 1.20+.
 
 ## Installation
 
 ```bash
-go get -u github.com/h2non/bimg
+go get -u github.com/nestor-sk/vimgo
 ```
 
 ### libvips
@@ -79,7 +66,7 @@ Follow `libvips` [installation instructions](https://libvips.github.io/libvips/i
 libvips is probably the fastest open source solution for image processing.
 Here you can see some performance test comparisons for multiple scenarios:
 
-- [libvips speed and memory usage](https://github.com/jcupitt/libvips/wiki/Speed-and-memory-use)
+- [libvips speed and memory usage](https://github.com/libvips/libvips/wiki/Speed-and-memory-use)
 
 ## Benchmark
 
@@ -133,7 +120,7 @@ func main() {
 Run the process passing the `DEBUG` environment variable
 
 ```
-DEBUG=bimg ./app
+DEBUG=cimgo ./app
 ```
 
 Enable libvips traces (note that a lot of data will be written in stdout):
@@ -142,7 +129,7 @@ Enable libvips traces (note that a lot of data will be written in stdout):
 VIPS_TRACE=1 ./app
 ```
 
-You can also dump a core on failure, as [John Cuppit](https://github.com/jcupitt) said:
+You can also dump a core on failure:
 
 ```c
 g_log_set_always_fatal(
@@ -163,14 +150,15 @@ export G_DEBUG=fatal-warnings,fatal-criticals
 
 See [godoc reference](https://godoc.org/github.com/h2non/bimg) for detailed API documentation.
 
-## Authors
-
-- [Tomás Aparicio](https://github.com/h2non) - Original author and architect.
-
 ## Credits
 
 People who recurrently contributed to improve `bimg` in some way.
 
+- [Nestor Lafon-Gracia](https://github.com/nestorlafon)
+
+People who recurrently contributed to improve `bimg` in some way.
+
+- [Tomás Aparicio](https://github.com/h2non) - Original author and architect.
 - [John Cupitt](https://github.com/jcupitt)
 - [Yoan Blanc](https://github.com/greut)
 - [Christophe Eblé](https://github.com/chreble)
@@ -184,3 +172,11 @@ Thank you!
 MIT - Tomas Aparicio
 
 [![views](https://sourcegraph.com/api/repos/github.com/h2non/bimg/.counters/views.svg)](https://sourcegraph.com/github.com/h2non/bimg)
+
+---
+
+TODO
+
+- [ ] generate documentation and add badge (and update documentation secition)
+- [ ] make sure coverall coverage works
+- [ ] benchmarking (md section)
