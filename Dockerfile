@@ -64,8 +64,6 @@ RUN DEBIAN_FRONTEND=noninteractive \
 WORKDIR ${GOPATH}/src/github.com/nestor-sk/vimgo
 
 COPY go.mod .
-COPY go.sum .
-
 RUN go mod download
 
 COPY . .
