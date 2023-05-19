@@ -22,19 +22,17 @@ func TestImageResize(t *testing.T) {
 }
 
 func TestImageGifResize(t *testing.T) {
-	if VipsMajorVersion >= 8 && VipsMinorVersion >= 12 {
-		buf, err := initImage("test.gif").Resize(300, 240)
-		if err != nil {
-			t.Errorf("Cannot process the image: %#v", err)
-		}
-
-		err = assertSize(buf, 300, 240)
-		if err != nil {
-			t.Error(err)
-		}
-
-		os.WriteFile("testdata/test_resize_out.gif", buf, 0664)
+	buf, err := initImage("test.gif").Resize(300, 240)
+	if err != nil {
+		t.Errorf("Cannot process the image: %#v", err)
 	}
+
+	err = assertSize(buf, 300, 240)
+	if err != nil {
+		t.Error(err)
+	}
+
+	os.WriteFile("testdata/test_resize_out.gif", buf, 0664)
 }
 
 func TestImagePdfResize(t *testing.T) {
@@ -52,48 +50,42 @@ func TestImageSvgResize(t *testing.T) {
 }
 
 func TestImageGifToJpeg(t *testing.T) {
-	if VipsMajorVersion >= 8 && VipsMinorVersion > 2 {
-		i := initImage("test.gif")
-		options := Options{
-			Type: JPEG,
-		}
-		buf, err := i.Process(options)
-		if err != nil {
-			t.Errorf("Cannot process the image: %#v", err)
-		}
-
-		os.WriteFile("testdata/test_gif.jpg", buf, 0644)
+	i := initImage("test.gif")
+	options := Options{
+		Type: JPEG,
 	}
+	buf, err := i.Process(options)
+	if err != nil {
+		t.Errorf("Cannot process the image: %#v", err)
+	}
+
+	os.WriteFile("testdata/test_gif_out.jpg", buf, 0644)
 }
 
 func TestImagePdfToJpeg(t *testing.T) {
-	if VipsMajorVersion >= 8 && VipsMinorVersion > 2 {
-		i := initImage("test.pdf")
-		options := Options{
-			Type: JPEG,
-		}
-		buf, err := i.Process(options)
-		if err != nil {
-			t.Errorf("Cannot process the image: %#v", err)
-		}
-
-		os.WriteFile("testdata/test_pdf.jpg", buf, 0644)
+	i := initImage("test.pdf")
+	options := Options{
+		Type: JPEG,
 	}
+	buf, err := i.Process(options)
+	if err != nil {
+		t.Errorf("Cannot process the image: %#v", err)
+	}
+
+	os.WriteFile("testdata/test_pdf_out.jpg", buf, 0644)
 }
 
 func TestImageSvgToJpeg(t *testing.T) {
-	if VipsMajorVersion >= 8 && VipsMinorVersion > 2 {
-		i := initImage("test.svg")
-		options := Options{
-			Type: JPEG,
-		}
-		buf, err := i.Process(options)
-		if err != nil {
-			t.Errorf("Cannot process the image: %#v", err)
-		}
-
-		os.WriteFile("testdata/test_svg.jpg", buf, 0644)
+	i := initImage("test.svg")
+	options := Options{
+		Type: JPEG,
 	}
+	buf, err := i.Process(options)
+	if err != nil {
+		t.Errorf("Cannot process the image: %#v", err)
+	}
+
+	os.WriteFile("testdata/test_svg_out.jpg", buf, 0644)
 }
 
 func TestImageResizeAndCrop(t *testing.T) {
@@ -356,11 +348,6 @@ func TestImageRotate(t *testing.T) {
 }
 
 func TestImageAutoRotate(t *testing.T) {
-	if VipsMajorVersion <= 8 && VipsMinorVersion < 10 {
-		t.Skip("Skip test in libvips < 8.10")
-		return
-	}
-
 	tests := []struct {
 		file        string
 		orientation int
@@ -503,11 +490,6 @@ func TestFluentInterface(t *testing.T) {
 }
 
 func TestImageSmartCrop(t *testing.T) {
-
-	if !(VipsMajorVersion >= 8 && VipsMinorVersion >= 5) {
-		t.Skipf("Skipping this test, libvips doesn't meet version requirement %s >= 8.5", VipsVersion)
-	}
-
 	i := initImage("northern_cardinal_bird.jpg")
 	buf, err := i.SmartCrop(300, 300)
 	if err != nil {
@@ -519,15 +501,10 @@ func TestImageSmartCrop(t *testing.T) {
 		t.Error(err)
 	}
 
-	os.WriteFile("testdata/test_smart_crop.jpg", buf, 0644)
+	os.WriteFile("testdata/test_smart_crop_out.jpg", buf, 0644)
 }
 
 func TestImageTrim(t *testing.T) {
-
-	if !(VipsMajorVersion >= 8 && VipsMinorVersion >= 6) {
-		t.Skipf("Skipping this test, libvips doesn't meet version requirement %s >= 8.6", VipsVersion)
-	}
-
 	i := initImage("transparent.png")
 	buf, err := i.Trim()
 	if err != nil {
@@ -539,15 +516,10 @@ func TestImageTrim(t *testing.T) {
 		t.Errorf("The image wasn't trimmed.")
 	}
 
-	os.WriteFile("testdata/transparent_trim.png", buf, 0644)
+	os.WriteFile("testdata/transparent_trim_out.png", buf, 0644)
 }
 
 func TestImageTrimParameters(t *testing.T) {
-
-	if !(VipsMajorVersion >= 8 && VipsMinorVersion >= 6) {
-		t.Skipf("Skipping this test, libvips doesn't meet version requirement %s >= 8.6", VipsVersion)
-	}
-
 	i := initImage("test.png")
 	options := Options{
 		Trim:       true,
@@ -564,7 +536,7 @@ func TestImageTrimParameters(t *testing.T) {
 		t.Errorf("The image wasn't trimmed.")
 	}
 
-	os.WriteFile("testdata/parameter_trim.png", buf, 0644)
+	os.WriteFile("testdata/parameter_trim_out.png", buf, 0644)
 }
 
 func TestImageLength(t *testing.T) {

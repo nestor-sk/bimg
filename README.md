@@ -120,7 +120,7 @@ func main() {
 Run the process passing the `DEBUG` environment variable
 
 ```
-DEBUG=cimgo ./app
+DEBUG=vimgo ./app
 ```
 
 Enable libvips traces (note that a lot of data will be written in stdout):
@@ -152,7 +152,7 @@ See [godoc reference](https://godoc.org/github.com/h2non/bimg) for detailed API 
 
 ## Credits
 
-People who recurrently contributed to improve `bimg` in some way.
+People who recurrently contributed to improve `vimgo` in some way.
 
 - [Nestor Lafon-Gracia](https://github.com/nestorlafon)
 
@@ -170,8 +170,6 @@ Thank you!
 ## License
 
 MIT - Tomas Aparicio
-
-[![views](https://sourcegraph.com/api/repos/github.com/h2non/bimg/.counters/views.svg)](https://sourcegraph.com/github.com/h2non/bimg)
 
 ---
 

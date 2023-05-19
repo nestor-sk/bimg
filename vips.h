@@ -4,20 +4,6 @@
 #include <vips/foreign.h>
 #include <vips/vector.h>
 
-/**
- * Starting libvips 7.41, VIPS_ANGLE_x has been renamed to VIPS_ANGLE_Dx
- * "to help python". So we provide the macro to correctly build for versions
- * before 7.41.x.
- * https://github.com/jcupitt/libvips/blob/master/ChangeLog#L128
- */
-
-#if (VIPS_MAJOR_VERSION == 7 && VIPS_MINOR_VERSION < 41)
-#define VIPS_ANGLE_D0 VIPS_ANGLE_0
-#define VIPS_ANGLE_D90 VIPS_ANGLE_90
-#define VIPS_ANGLE_D180 VIPS_ANGLE_180
-#define VIPS_ANGLE_D270 VIPS_ANGLE_270
-#endif
-
 #define EXIF_IFD0_ORIENTATION "exif-ifd0-Orientation"
 
 #define INT_TO_GBOOLEAN(bool) (bool > 0 ? TRUE : FALSE)
@@ -82,26 +68,6 @@ has_alpha_channel(VipsImage *image)
 			   ? 1
 			   : 0;
 }
-
-/**
- * This method is here to handle the weird initialization of the vips lib.
- * libvips use a macro VIPS_INIT() that call vips__init() in version < 7.41,
- * or calls vips_init() in version >= 7.41.
- *
- * Anyway, it's not possible to build vimgo on Debian Jessie with libvips 7.40.x,
- * as vips_init() is a macro to VIPS_INIT(), which is also a macro, hence, cgo
- * is unable to determine the return type of vips_init(), making the build impossible.
- * In order to correctly build vimgo, for version < 7.41, we should undef vips_init and
- * creates a vips_init() method that calls VIPS_INIT().
- */
-
-#if (VIPS_MAJOR_VERSION == 7 && VIPS_MINOR_VERSION < 41)
-#undef vips_init
-int vips_init(const char *argv0)
-{
-	return VIPS_INIT(argv0);
-}
-#endif
 
 void vips_enable_cache_set_trace()
 {
@@ -172,12 +138,10 @@ int vips_type_find_bridge(int t)
 	{
 		return vips_type_find("VipsOperation", "magickload");
 	}
-#if (VIPS_MAJOR_VERSION > 8 || (VIPS_MAJOR_VERSION == 8 && VIPS_MINOR_VERSION >= 8))
 	if (t == HEIF)
 	{
 		return vips_type_find("VipsOperation", "heifload");
 	}
-#endif
 	return 0;
 }
 
@@ -199,18 +163,14 @@ int vips_type_find_save_bridge(int t)
 	{
 		return vips_type_find("VipsOperation", "jpegsave_buffer");
 	}
-#if (VIPS_MAJOR_VERSION > 8 || (VIPS_MAJOR_VERSION == 8 && VIPS_MINOR_VERSION >= 8))
 	if (t == HEIF)
 	{
 		return vips_type_find("VipsOperation", "heifsave_buffer");
 	}
-#endif
-#if (VIPS_MAJOR_VERSION > 8 || (VIPS_MAJOR_VERSION == 8 && VIPS_MINOR_VERSION >= 12))
 	if (t == GIF)
 	{
 		return vips_type_find("VipsOperation", "gifsave_buffer");
 	}
-#endif
 	return 0;
 }
 
@@ -381,7 +341,6 @@ int vips_jpegsave_bridge(VipsImage *in, void **buf, size_t *len, int strip, int 
 
 int vips_pngsave_bridge(VipsImage *in, void **buf, size_t *len, int strip, int compression, int quality, int interlace, int palette, int speed)
 {
-#if (VIPS_MAJOR_VERSION >= 8 && VIPS_MINOR_VERSION >= 12)
 	int effort = 10 - speed;
 	return vips_pngsave_buffer(in, buf, len,
 							   "strip", INT_TO_GBOOLEAN(strip),
@@ -392,21 +351,6 @@ int vips_pngsave_bridge(VipsImage *in, void **buf, size_t *len, int strip, int c
 							   "Q", quality,
 							   "effort", effort,
 							   NULL);
-#elif (VIPS_MAJOR_VERSION >= 8 && VIPS_MINOR_VERSION >= 7)
-	return vips_pngsave_buffer(in, buf, len,
-							   "strip", INT_TO_GBOOLEAN(strip),
-							   "compression", compression,
-							   "interlace", INT_TO_GBOOLEAN(interlace),
-							   "filter", VIPS_FOREIGN_PNG_FILTER_ALL,
-							   "palette", INT_TO_GBOOLEAN(palette),
-							   NULL);
-#else
-	return vips_pngsave_buffer(in, buf, len,
-							   "strip", INT_TO_GBOOLEAN(strip),
-							   "compression", compression,
-							   "interlace", INT_TO_GBOOLEAN(interlace),
-							   NULL);
-#endif
 }
 
 int vips_webpsave_bridge(VipsImage *in, void **buf, size_t *len, int strip, int quality, int lossless)
@@ -420,16 +364,11 @@ int vips_webpsave_bridge(VipsImage *in, void **buf, size_t *len, int strip, int 
 
 int vips_tiffsave_bridge(VipsImage *in, void **buf, size_t *len)
 {
-#if (VIPS_MAJOR_VERSION >= 8 && VIPS_MINOR_VERSION >= 5)
 	return vips_tiffsave_buffer(in, buf, len, NULL);
-#else
-	return 0;
-#endif
 }
 
 int vips_avifsave_bridge(VipsImage *in, void **buf, size_t *len, int strip, int quality, int lossless, int speed)
 {
-#if (VIPS_MAJOR_VERSION > 8 || (VIPS_MAJOR_VERSION >= 8 && VIPS_MINOR_VERSION > 10) || (VIPS_MAJOR_VERSION >= 8 && VIPS_MINOR_VERSION >= 10 && VIPS_MICRO_VERSION >= 2))
 	return vips_heifsave_buffer(in, buf, len,
 								"strip", INT_TO_GBOOLEAN(strip),
 								"Q", quality,
@@ -437,40 +376,22 @@ int vips_avifsave_bridge(VipsImage *in, void **buf, size_t *len, int strip, int 
 								"compression", VIPS_FOREIGN_HEIF_COMPRESSION_AV1,
 								"speed", speed,
 								NULL);
-#elif (VIPS_MAJOR_VERSION > 8 || (VIPS_MAJOR_VERSION == 8 && VIPS_MINOR_VERSION >= 9))
-	return vips_heifsave_buffer(in, buf, len,
-								"strip", INT_TO_GBOOLEAN(strip),
-								"Q", quality,
-								"lossless", INT_TO_GBOOLEAN(lossless),
-								"compression", VIPS_FOREIGN_HEIF_COMPRESSION_AV1,
-								NULL);
-#else
-	return 0;
-#endif
 }
 
 int vips_heifsave_bridge(VipsImage *in, void **buf, size_t *len, int strip, int quality, int lossless)
 {
-#if (VIPS_MAJOR_VERSION > 8 || (VIPS_MAJOR_VERSION == 8 && VIPS_MINOR_VERSION >= 8))
 	return vips_heifsave_buffer(in, buf, len,
 								"strip", INT_TO_GBOOLEAN(strip),
 								"Q", quality,
 								"lossless", INT_TO_GBOOLEAN(lossless),
 								NULL);
-#else
-	return 0;
-#endif
 }
 
 int vips_gifsave_bridge(VipsImage *in, void **buf, size_t *len, int strip)
 {
-#if (VIPS_MAJOR_VERSION > 8 || (VIPS_MAJOR_VERSION == 8 && VIPS_MINOR_VERSION >= 12))
 	return vips_gifsave_buffer(in, buf, len,
 							   "strip", INT_TO_GBOOLEAN(strip),
 							   NULL);
-#else
-	return 0;
-#endif
 }
 
 int vips_is_16bit(VipsInterpretation interpretation)
@@ -515,8 +436,6 @@ int vips_init_image(void *buf, size_t len, int imageType, VipsImage **out)
 	else if (imageType == TIFF)
 	{
 		code = vips_tiffload_buffer(buf, len, out, "access", VIPS_ACCESS_RANDOM, NULL);
-#if (VIPS_MAJOR_VERSION >= 8)
-#if (VIPS_MINOR_VERSION >= 3)
 	}
 	else if (imageType == GIF)
 	{
@@ -529,24 +448,18 @@ int vips_init_image(void *buf, size_t len, int imageType, VipsImage **out)
 	else if (imageType == SVG)
 	{
 		code = vips_svgload_buffer(buf, len, out, "access", VIPS_ACCESS_RANDOM, NULL);
-#endif
 	}
 	else if (imageType == MAGICK)
 	{
 		code = vips_magickload_buffer(buf, len, out, "access", VIPS_ACCESS_RANDOM, NULL);
-#endif
-#if (VIPS_MAJOR_VERSION > 8 || (VIPS_MAJOR_VERSION == 8 && VIPS_MINOR_VERSION >= 8))
 	}
 	else if (imageType == HEIF)
 	{
 		code = vips_heifload_buffer(buf, len, out, "access", VIPS_ACCESS_RANDOM, NULL);
-#endif
-#if (VIPS_MAJOR_VERSION == 8 && VIPS_MINOR_VERSION >= 9)
 	}
 	else if (imageType == AVIF)
 	{
 		code = vips_heifload_buffer(buf, len, out, "access", VIPS_ACCESS_RANDOM, NULL);
-#endif
 	}
 
 	return code;
@@ -632,38 +545,17 @@ int vips_watermark(VipsImage *in, VipsImage **out, WatermarkTextOptions *to, Wat
 
 int vips_gaussblur_bridge(VipsImage *in, VipsImage **out, double sigma, double min_ampl)
 {
-#if (VIPS_MAJOR_VERSION == 7 && VIPS_MINOR_VERSION < 41)
-	return vips_gaussblur(in, out, (int)sigma, NULL);
-#else
 	return vips_gaussblur(in, out, sigma, NULL, "min_ampl", min_ampl, NULL);
-#endif
 }
 
 int vips_sharpen_bridge(VipsImage *in, VipsImage **out, int radius, double x1, double y2, double y3, double m1, double m2)
 {
-#if (VIPS_MAJOR_VERSION == 7 && VIPS_MINOR_VERSION < 41)
-	return vips_sharpen(in, out, radius, x1, y2, y3, m1, m2, NULL);
-#else
 	return vips_sharpen(in, out, "radius", radius, "x1", x1, "y2", y2, "y3", y3, "m1", m1, "m2", m2, NULL);
-#endif
 }
 
 int vips_add_band(VipsImage *in, VipsImage **out, double c)
 {
-#if (VIPS_MAJOR_VERSION > 8 || (VIPS_MAJOR_VERSION >= 8 && VIPS_MINOR_VERSION >= 2))
 	return vips_bandjoin_const1(in, out, c, NULL);
-#else
-	VipsImage *base = vips_image_new();
-	if (
-		vips_black(&base, in->Xsize, in->Ysize, NULL) ||
-		vips_linear1(base, &base, 1, c, NULL))
-	{
-		g_object_unref(base);
-		return 1;
-	}
-	g_object_unref(base);
-	return vips_bandjoin2(in, base, out, c, NULL);
-#endif
 }
 
 int vips_watermark_image(VipsImage *in, VipsImage *sub, VipsImage **out, WatermarkImageOptions *o)
@@ -724,16 +616,11 @@ int vips_watermark_image(VipsImage *in, VipsImage *sub, VipsImage **out, Waterma
 
 int vips_smartcrop_bridge(VipsImage *in, VipsImage **out, int width, int height)
 {
-#if (VIPS_MAJOR_VERSION >= 8 && VIPS_MINOR_VERSION >= 5)
 	return vips_smartcrop(in, out, width, height, NULL);
-#else
-	return 0;
-#endif
 }
 
 int vips_find_trim_bridge(VipsImage *in, int *top, int *left, int *width, int *height, double r, double g, double b, double threshold)
 {
-#if (VIPS_MAJOR_VERSION >= 8 && VIPS_MINOR_VERSION >= 6)
 	if (vips_is_16bit(in->Type))
 	{
 		r = 65535 * r / 255;
@@ -744,9 +631,6 @@ int vips_find_trim_bridge(VipsImage *in, int *top, int *left, int *width, int *h
 	double background[3] = {r, g, b};
 	VipsArrayDouble *vipsBackground = vips_array_double_new(background, 3);
 	return vips_find_trim(in, top, left, width, height, "background", vipsBackground, "threshold", threshold, NULL);
-#else
-	return 0;
-#endif
 }
 
 int vips_gamma_bridge(VipsImage *in, VipsImage **out, double exponent)
