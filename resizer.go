@@ -22,7 +22,15 @@ var (
 func resizer(buf []byte, o Options) ([]byte, error) {
 	defer C.vips_thread_shutdown()
 
-	image, imageType, err := loadImage(buf)
+	var image *C.VipsImage
+	var imageType ImageType
+	var err error
+	if o.Original.Type == RGBA {
+		//TODO: if a previous operation changed the size of the image, this will fail as we pass the original size and the data will be probably smaller
+		image, imageType, err = loadRGBAImage(buf, o.Original.Width, o.Original.Height)
+	} else {
+		image, imageType, err = loadImage(buf)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -31,9 +39,9 @@ func resizer(buf []byte, o Options) ([]byte, error) {
 	o = applyDefaults(o, imageType)
 
 	// Ensure supported type
-	if !IsTypeSupportedSave(o.Type) {
-		return nil, errors.New("unsupported image output type")
-	}
+	// if !IsTypeSupportedSave(o.Type) {
+	// 	return nil, errors.New("unsupported image output type")
+	// }
 
 	// Autorate only
 	if o.autoRotateOnly {
@@ -164,6 +172,19 @@ func loadImage(buf []byte) (*C.VipsImage, ImageType, error) {
 	image, imageType, err := vipsRead(buf)
 	if err != nil {
 		return nil, JPEG, err
+	}
+
+	return image, imageType, nil
+}
+
+func loadRGBAImage(buf []byte, width int, height int) (*C.VipsImage, ImageType, error) {
+	if len(buf) == 0 {
+		return nil, RGBA, errors.New("Image buffer is empty")
+	}
+
+	image, imageType, err := vipsReadRGBA(buf, width, height)
+	if err != nil {
+		return nil, RGBA, err
 	}
 
 	return image, imageType, nil

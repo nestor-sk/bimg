@@ -2,12 +2,20 @@ package vimgo
 
 // Image provides a simple method DSL to transform a given image as byte buffer.
 type Image struct {
-	buffer []byte
+	buffer    []byte
+	rawRGBA   bool
+	rawHeight int
+	rawWidth  int
 }
 
 // NewImage creates a new Image struct with method DSL.
 func NewImage(buf []byte) *Image {
-	return &Image{buf}
+	return &Image{buffer: buf}
+}
+
+// NewRawRGBAImage creates a new Image struct with method DSL.
+func NewRawRGBAImage(buf []byte, width, height int) *Image {
+	return &Image{buffer: buf, rawRGBA: true, rawWidth: width, rawHeight: height}
 }
 
 // Resize resizes the image to fixed width and height.
@@ -200,6 +208,7 @@ func (i *Image) Gamma(exponent float64) ([]byte, error) {
 // talking with libvips bindings accordingly and returning the resultant
 // image buffer.
 func (i *Image) Process(o Options) ([]byte, error) {
+	o = i.ApplyOriginal(o)
 	image, err := Resize(i.buffer, o)
 	if err != nil {
 		return nil, err
@@ -227,7 +236,11 @@ func (i *Image) ColourspaceIsSupported() (bool, error) {
 
 // Type returns the image type format (jpeg, png, webp, tiff).
 func (i *Image) Type() string {
-	return DetermineImageTypeName(i.buffer)
+	bufferTypeName := DetermineImageTypeName(i.buffer)
+	if bufferTypeName == ImageTypeName(UNKNOWN) && i.rawRGBA {
+		bufferTypeName = ImageTypeName(RGBA)
+	}
+	return bufferTypeName
 }
 
 // Size returns the image size as form of width and height pixels.
@@ -243,4 +256,14 @@ func (i *Image) Image() []byte {
 // Length returns the size in bytes of the image buffer.
 func (i *Image) Length() int {
 	return len(i.buffer)
+}
+
+// Adds information about the original image if available.
+func (i *Image) ApplyOriginal(o Options) Options {
+	if i.rawRGBA {
+		o.Original.Type = RGBA
+		o.Original.Width = i.rawWidth
+		o.Original.Height = i.rawHeight
+	}
+	return o
 }

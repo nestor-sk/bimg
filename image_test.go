@@ -550,6 +550,71 @@ func TestImageLength(t *testing.T) {
 	}
 }
 
+func TestRawRGBAImageFormat(t *testing.T) {
+	b, _ := imageBuf("test_tiny.raw")
+	i := NewRawRGBAImage(b, 8, 8)
+
+	tp := i.Type()
+
+	if tp != "rgba" {
+		t.Errorf("Image type doesn't correspond. rgba != %s", tp)
+	}
+
+	_, err := i.Convert(PNG)
+	if err != nil {
+		t.Errorf("Cannot process the image: %#v", err)
+	}
+
+	if i.Type() != "png" {
+		t.Errorf("Image type doesn't correspond. png != %s", i.Type())
+	}
+
+	os.WriteFile("testdata/test_tiny_out.png", i.Image(), 0644)
+}
+
+func TestRawRGBAImageResize(t *testing.T) {
+	b, _ := imageBuf("test_tiny.raw")
+	i := NewRawRGBAImage(b, 8, 8)
+
+	buf, err := i.Resize(4, 4)
+	if err != nil {
+		t.Errorf("Cannot process the image: %#v", err)
+	}
+
+	if len(buf) != 4*4*4 {
+		t.Errorf("Invalid size of the image. %d != %d", len(buf), 4*4*4)
+	}
+
+	smaller_image := NewRawRGBAImage(buf, 4, 4)
+	convert, err := smaller_image.Convert(PNG)
+	if err != nil {
+		t.Errorf("Cannot process the image: %#v", err)
+	}
+
+	os.WriteFile("testdata/test_super_tiny_out.png", convert, 0664)
+}
+
+func TestRawRGBAFluentImageResize(t *testing.T) {
+	b, _ := imageBuf("test_tiny.raw")
+	i := NewRawRGBAImage(b, 8, 8)
+
+	buf, err := i.Resize(4, 4)
+	if err != nil {
+		t.Errorf("Cannot process the image: %#v", err)
+	}
+
+	if len(buf) != 4*4*4 {
+		t.Errorf("Invalid size of the image. %d != %d", len(buf), 4*4*4)
+	}
+
+	_, err = i.Convert(PNG)
+	if err != nil {
+		t.Errorf("Cannot process the image: %#v", err)
+	}
+
+	os.WriteFile("testdata/test_super_tiny_out.png", i.Image(), 0664)
+}
+
 func initImage(file string) *Image {
 	buf, _ := imageBuf(file)
 	return NewImage(buf)

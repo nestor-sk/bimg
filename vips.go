@@ -385,6 +385,18 @@ func vipsRead(buf []byte) (*C.VipsImage, ImageType, error) {
 	return image, imageType, nil
 }
 
+func vipsReadRGBA(buf []byte, width int, height int) (*C.VipsImage, ImageType, error) {
+	var image *C.VipsImage
+	length := C.size_t(len(buf))
+	imageBuf := unsafe.Pointer(&buf[0])
+
+	err := C.vips_init_raw_image(imageBuf, length, C.int(width), C.int(height), &image)
+	if err != 0 {
+		return nil, RGBA, catchVipsError()
+	}
+	return image, RGBA, nil
+}
+
 func vipsColourspaceIsSupportedBuffer(buf []byte) (bool, error) {
 	image, _, err := vipsRead(buf)
 	if err != nil {
@@ -529,6 +541,8 @@ func vipsSave(image *C.VipsImage, o vipsSaveOptions) ([]byte, error) {
 		saveErr = C.vips_avifsave_bridge(tmpImage, &ptr, &length, strip, quality, lossless, speed)
 	case GIF:
 		saveErr = C.vips_gifsave_bridge(tmpImage, &ptr, &length, strip)
+	case RGBA:
+		saveErr = C.vips_rgbasave_bridge(tmpImage, &ptr, &length)
 	default:
 		saveErr = C.vips_jpegsave_bridge(tmpImage, &ptr, &length, strip, quality, interlace)
 	}

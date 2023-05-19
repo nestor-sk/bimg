@@ -32,6 +32,8 @@ const (
 	HEIF
 	// AVIF represents the AVIF image type.
 	AVIF
+	// RGBA raw image type
+	RGBA
 )
 
 var (
@@ -51,6 +53,7 @@ var ImageTypes = map[ImageType]string{
 	MAGICK: "magick",
 	HEIF:   "heif",
 	AVIF:   "avif",
+	RGBA:   "rgba",
 }
 
 // imageMutex is used to provide thread-safe synchronization
@@ -153,6 +156,9 @@ func IsTypeNameSupported(t string) bool {
 
 // IsTypeSupportedSave checks if a given image type is support for saving
 func IsTypeSupportedSave(t ImageType) bool {
+	if t == RGBA {
+		return true
+	}
 	_, ok := ImageTypes[t]
 	return ok && IsImageTypeSupportedByVips(t).Save
 }

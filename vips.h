@@ -394,6 +394,12 @@ int vips_gifsave_bridge(VipsImage *in, void **buf, size_t *len, int strip)
 							   NULL);
 }
 
+int vips_rgbasave_bridge(VipsImage *in, void **buf, size_t *len)
+{
+	*buf = vips_image_write_to_memory(in, len);
+	return *buf ? 0 : -1;
+}
+
 int vips_is_16bit(VipsInterpretation interpretation)
 {
 	return interpretation == VIPS_INTERPRETATION_RGB16 || interpretation == VIPS_INTERPRETATION_GREY16;
@@ -463,6 +469,12 @@ int vips_init_image(void *buf, size_t len, int imageType, VipsImage **out)
 	}
 
 	return code;
+}
+
+int vips_init_raw_image(void *buf, size_t len, int width, int height, VipsImage **out)
+{
+	*out = vips_image_new_from_memory(buf, len, width, height, 4, VIPS_FORMAT_UCHAR);
+	return *out ? 0 : -1;
 }
 
 int vips_watermark_replicate(VipsImage *orig, VipsImage *in, VipsImage **out)

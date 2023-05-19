@@ -204,6 +204,12 @@ type Sharpen struct {
 	M2     float64
 }
 
+type Original struct {
+	Type   ImageType
+	Width  int
+	Height int
+}
+
 // Options represents the supported image transformation options.
 type Options struct {
 	Height         int
@@ -253,4 +259,7 @@ type Options struct {
 
 	// private fields
 	autoRotateOnly bool
+
+	// Original image data, might empty
+	Original Original
 }
