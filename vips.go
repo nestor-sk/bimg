@@ -86,6 +86,10 @@ func init() {
 // Initialize is used to explicitly start libvips in thread-safe way.
 // Only call this function if you have previously turned off libvips.
 func Initialize() {
+	if VipsMajorVersion <= 8 && VipsMinorVersion < 14 {
+		panic("unsupported libvips version!")
+	}
+
 	m.Lock()
 	runtime.LockOSThread()
 	defer m.Unlock()
