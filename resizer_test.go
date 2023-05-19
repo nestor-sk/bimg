@@ -547,10 +547,6 @@ func TestRotationAndFlip(t *testing.T) {
 }
 
 func TestIfBothSmartCropOptionsAreIdentical(t *testing.T) {
-	if !(VipsMajorVersion >= 8 && VipsMinorVersion > 4) {
-		t.Skipf("Skipping this test, libvips doesn't meet version requirement %s > 8.4", VipsVersion)
-	}
-
 	benchmarkOptions := Options{Width: 100, Height: 100, Crop: true}
 	smartCropOptions := Options{Width: 100, Height: 100, Crop: true, SmartCrop: true}
 	gravityOptions := Options{Width: 100, Height: 100, Crop: true, Gravity: GravitySmart}

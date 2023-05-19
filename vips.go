@@ -86,10 +86,6 @@ func init() {
 // Initialize is used to explicitly start libvips in thread-safe way.
 // Only call this function if you have previously turned off libvips.
 func Initialize() {
-	if C.VIPS_MAJOR_VERSION <= 7 && C.VIPS_MINOR_VERSION < 40 {
-		panic("unsupported libvips version!")
-	}
-
 	m.Lock()
 	runtime.LockOSThread()
 	defer m.Unlock()
@@ -570,7 +566,7 @@ func vipsExtract(image *C.VipsImage, left, top, width, height int) (*C.VipsImage
 	defer C.g_object_unref(C.gpointer(image))
 
 	if width > maxSize || height > maxSize {
-		return nil, errors.New("maximum image size exceeded")
+		return nil, fmt.Errorf("maximum image size exceeded: %dx%d (max %d)", width, height, maxSize)
 	}
 
 	top, left = max(top), max(left)
@@ -587,7 +583,7 @@ func vipsSmartCrop(image *C.VipsImage, width, height int) (*C.VipsImage, error) 
 	defer C.g_object_unref(C.gpointer(image))
 
 	if width > maxSize || height > maxSize {
-		return nil, errors.New("maximum image size exceeded")
+		return nil, fmt.Errorf("maximum image size exceeded: %dx%d (max %d)", width, height, maxSize)
 	}
 
 	err := C.vips_smartcrop_bridge(image, &buf, C.int(width), C.int(height))
